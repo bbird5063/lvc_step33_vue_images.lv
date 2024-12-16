@@ -14,3 +14,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', 'App\Http\Controllers\IndexController');
+//Route::get('{page}', 'App\Http\Controllers\IndexController')->where('page', '.*');
