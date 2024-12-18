@@ -20,7 +20,7 @@ return new class extends Migration
 
 			$table->index('post_id', 'image_post_idx');
 			$table->foreign('post_id', 'image_post_fk')
-			->on('post ')
+			->on('posts')
 			->references('id');
 		});
 	}

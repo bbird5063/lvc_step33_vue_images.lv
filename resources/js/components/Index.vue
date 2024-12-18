@@ -27,18 +27,21 @@ export default {
 			url: '/api/posts', // обязательное свойство, указываем что угодно(пока это не имеет значения)
 			clickable: true, // true - по умолчанию
 			autoProcessQueue: false, // Отключаем автоматическую отправку изображения 
+			addRemoveLinks: true, // добавляем ссылку на удаление 'Remove file' (внизу под картинкой)
 		});
 	},
 
 	methods: {
 		store() {
-			const images = new FormData();
+			const data = new FormData();
 			const files = this.dropzone.getAcceptedFiles();
 			files.forEach(file => {
-				images.append('images[]', file);
+				data.append('images[]', file);
+				this.dropzone.removeFile(file); // удаляем файлы из dropzone
 			})
-			axios.post('/api/posts', images);
-
+			data.append('title', this.title);
+			this.title = ''; // удаляем title
+			axios.post('/api/posts', data);
 		},
 	},
 }
