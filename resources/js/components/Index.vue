@@ -11,6 +11,7 @@
 			<div>
 				<h4>{{ post.title }}</h4>
 				<div v-for="image in post.images" class="mb-2">
+					<img :src="image.preview_url" class="mb-3">
 					<img :src="image.url">
 				</div>
 			</div>
@@ -40,7 +41,7 @@ export default {
 			addRemoveLinks: true, // добавляем ссылку на удаление 'Remove file' (внизу под картинкой)
 		});
 
-		this.getPosts();
+		this.getPost();
 	},
 
 	methods: {
@@ -53,10 +54,13 @@ export default {
 			})
 			data.append('title', this.title);
 			this.title = ''; // удаляем title
-			axios.post('/api/posts', data);
+			axios.post('/api/posts', data)
+			.then(res=>{
+				this.getPost(); // чтобы лента обновилась
+			})
 		},
 
-		getPosts() {
+		getPost() {
 			axios.get('/api/posts')
 				.then(res => {
 					this.post = res.data.data;

@@ -16,6 +16,7 @@ class ImageResource extends JsonResource
     {
         return [
 					'url' => $this->url,
+					'preview_url' => $this->preview_url,
 				];
     }
 }
