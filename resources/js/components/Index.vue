@@ -5,8 +5,13 @@
 		<div ref="dropzone" class="mb-3 btn d-block p-5 bg-dark text-center text-light">
 			Upload
 		</div>
-		<input @click.prevent="store" type="submit" value="add" class="btn btn-primary">
 
+		<!--ВСТАВИЛ @image-added @change-->
+		<div class="mb-3">
+			<vue-editor useCustomImageHandler @image-added="handleImageAdded" v-model="content" />
+		</div>
+
+		<input @click.prevent="store" type="submit" value="add" class="btn btn-primary">
 		<div v-if="post" class="mt-5">
 			<div>
 				<h4>{{ post.title }}</h4>
@@ -21,6 +26,8 @@
 
 <script>
 import Dropzone from 'dropzone';
+//import Quill from 'quill';
+import { VueEditor } from "vue3-editor"; // ВСТАВИЛ
 export default {
 	name: 'Index',
 
@@ -29,7 +36,12 @@ export default {
 			dropzone: null,
 			title: null,
 			post: null,
+			content: null, // ВСТАВИЛ
 		}
+	},
+
+	components: {
+		VueEditor  // ВСТАВИЛ
 	},
 
 	mounted() {
@@ -55,9 +67,9 @@ export default {
 			data.append('title', this.title);
 			this.title = ''; // удаляем title
 			axios.post('/api/posts', data)
-			.then(res=>{
-				this.getPost(); // чтобы лента обновилась
-			})
+				.then(res => {
+					this.getPost(); // чтобы лента обновилась
+				})
 		},
 
 		getPost() {
@@ -66,7 +78,26 @@ export default {
 					this.post = res.data.data;
 					console.log(this.post);
 				});
-		}
+		},
+
+		handleImageAdded(file, Editor, cursorLocation, resetUploader) {
+			// Пример использования FormData
+			// ПРИМЕЧАНИЕ: Ваш ключ может быть другим, например:
+			// formData.append('file', file)
+			var formData = new FormData();
+			formData.append("image", file);
+
+			axios.post('/api/posts/images', formData) // изменили по нашему
+				.then(result => {
+					const url = result.data.url; // Get url from response
+					Editor.insertEmbed(cursorLocation, "image", url);
+					resetUploader();
+				})
+				.catch(err => {
+					console.log(err);
+				});
+
+		},
 	},
 }
 </script>
