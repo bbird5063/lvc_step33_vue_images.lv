@@ -1,6 +1,6 @@
 <template>
 	<div class="w-25">
-		<input v-model="title" name="title" type="text" class="mb-3 form-contol" placeholder="title">
+		<input v-model="title" type="text" class="mb-3 form-contol" placeholder="title">
 		<!--class="btn - чтобы палец появился и +d-block а то размеры будут как у кнопки -->
 		<div ref="dropzone" class="mb-3 btn d-block p-5 bg-dark text-center text-light">
 			Upload
@@ -19,6 +19,12 @@
 					<img :src="image.preview_url" class="mb-3">
 					<img :src="image.url">
 				</div>
+
+				<!--ДОБАВИЛИ, 
+					для наследования класса от родителя
+					(выравнивания и т.д.-class="ql-editor")-->
+				<div class="ql-editor" v-html="post.content"></div>
+
 			</div>
 		</div>
 	</div>
@@ -27,7 +33,7 @@
 <script>
 import Dropzone from 'dropzone';
 //import Quill from 'quill';
-import { VueEditor } from "vue3-editor"; // ВСТАВИЛ
+import { VueEditor } from "vue3-editor";
 export default {
 	name: 'Index',
 
@@ -36,12 +42,12 @@ export default {
 			dropzone: null,
 			title: null,
 			post: null,
-			content: null, // ВСТАВИЛ
+			content: null,
 		}
 	},
 
 	components: {
-		VueEditor  // ВСТАВИЛ
+		VueEditor
 	},
 
 	mounted() {
@@ -65,7 +71,9 @@ export default {
 				this.dropzone.removeFile(file); // удаляем файлы из dropzone
 			})
 			data.append('title', this.title);
+			data.append('content', this.content);
 			this.title = ''; // удаляем title
+			this.content = ''; // удаляем content
 			axios.post('/api/posts', data)
 				.then(res => {
 					this.getPost(); // чтобы лента обновилась
@@ -102,4 +110,9 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style>
+.dz-success-mark,
+.dz-error-mark {
+	display: none;
+}
+</style>

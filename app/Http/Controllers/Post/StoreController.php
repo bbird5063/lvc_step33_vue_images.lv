@@ -19,8 +19,6 @@ class StoreController extends Controller
 		$images = $data['images']; // при отстуствии картинки: {message: "Undefined array key "images"", exception: "ErrorException",…}, дальше ничего не выплняется
 		unset($data['images']);
 
-		dump(phpinfo());
-
 		$post = Post::firstOrCreate($data);
 		foreach ($images as $image) {
 			$name = md5(Carbon::now() . '_' . $image->getClientOriginalName()) . '.' . $image->getClientOriginalExtension();
