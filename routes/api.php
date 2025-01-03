@@ -23,5 +23,6 @@ Route::group(['namespace' => 'App\Http\Controllers\Post', 'prefix' => 'posts'], 
 		Route::post('/', 'StoreController');
 	});
 	Route::post('/', 'StoreController');
+	Route::patch('/{post}', 'UpdateController');
 	Route::get('/', 'IndexController');
 });

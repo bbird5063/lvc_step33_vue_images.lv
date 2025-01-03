@@ -11,8 +11,7 @@
 			<vue-editor useCustomImageHandler @image-added="handleImageAdded" v-model="content" />
 		</div>
 
-		<!--ИЗМЕНИЛ-->
-		<input @click.prevent="update" type="submit" value="Update" class="btn btn-primary">
+		<input @click.prevent="store" type="submit" value="Add" class="btn btn-primary">
 		<div v-if="post" class="mt-5">
 			<div>
 				<h4>{{ post.title }}</h4>
@@ -64,7 +63,7 @@ export default {
 	},
 
 	methods: {
-		update() {
+		store() {
 			const data = new FormData();
 			const files = this.dropzone.getAcceptedFiles();
 			files.forEach(file => {
@@ -73,12 +72,11 @@ export default {
 			})
 			data.append('title', this.title);
 			data.append('content', this.content);
-			data.append('_method', 'PATCH');
-			this.title = '';
-			this.content = '';
-			axios.post(`/api/posts/${this.post.id}`, data) // ИЗМЕНИЛ, но patch(в роуте нам нужен patch) мы укажем в data.append('_method', 'PATCH')(выше), а сдесь post
+			this.title = ''; // удаляем title
+			this.content = ''; // удаляем content
+			axios.post('/api/posts', data)
 				.then(res => {
-					this.getPost();
+					this.getPost(); // чтобы лента обновилась
 				})
 		},
 
@@ -86,29 +84,20 @@ export default {
 			axios.get('/api/posts')
 				.then(res => {
 					this.post = res.data.data;
-
-					this.title = this.post.title;
-					this.content = this.post.content;
-
-
-					this.post.images.forEach(image => { // ДОБАВИЛИ
-						/**
-						 * 1. Создаем файл (объект с атрибутами)
-						 * 2. Обращаемся к нашему this.dropzone и отображаем его использую URL
-						 */
-						let file = { name: image.name, size: image.size }; // 1. ДОБАВИЛИ
-						this.dropzone.displayExistingFile(file, image.url); // 2. ДОБАВИЛИ
-					});
+					console.log(this.post);
 				});
 		},
 
 		handleImageAdded(file, Editor, cursorLocation, resetUploader) {
+			// Пример использования FormData
+			// ПРИМЕЧАНИЕ: Ваш ключ может быть другим, например:
+			// formData.append('file', file)
 			var formData = new FormData();
 			formData.append("image", file);
 
 			axios.post('/api/posts/images', formData) // изменили по нашему
 				.then(result => {
-					const url = result.data.url;
+					const url = result.data.url; // Get url from response
 					Editor.insertEmbed(cursorLocation, "image", url);
 					resetUploader();
 				})
