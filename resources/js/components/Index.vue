@@ -44,6 +44,7 @@ export default {
 			title: null,
 			post: null,
 			content: null,
+			imagesIdsForDelete: [], // ДОБАВИЛИ
 		}
 	},
 
@@ -60,6 +61,11 @@ export default {
 			addRemoveLinks: true, // добавляем ссылку на удаление 'Remove file' (внизу под картинкой)
 		});
 
+		this.dropzone.on('removedfile', (file) => { // ДОБАВИЛИ
+			console.log(file); // при удалении файла, я увижу его в консоли
+			this.imagesIdsForDelete.push(file.id);
+		});
+
 		this.getPost();
 	},
 
@@ -71,12 +77,17 @@ export default {
 				data.append('images[]', file);
 				this.dropzone.removeFile(file); // удаляем файлы из dropzone
 			})
+
+			this.imagesIdsForDelete.forEach(idForDelete => { // ДОБАВИЛИ
+				data.append('images_ids_for_delete[]', idForDelete);
+			});
+
 			data.append('title', this.title);
 			data.append('content', this.content);
 			data.append('_method', 'PATCH');
 			this.title = '';
 			this.content = '';
-			axios.post(`/api/posts/${this.post.id}`, data) // ИЗМЕНИЛ, но patch(в роуте нам нужен patch) мы укажем в data.append('_method', 'PATCH')(выше), а сдесь post
+			axios.post(`/api/posts/${this.post.id}`, data) // ИЗМЕНИЛ, но patch(в роуте нам нужен patch) мы укажем в data.append('_method', 'PATCH')(выше), а здесь post
 				.then(res => {
 					this.getPost();
 				})
@@ -91,13 +102,13 @@ export default {
 					this.content = this.post.content;
 
 
-					this.post.images.forEach(image => { // ДОБАВИЛИ
+					this.post.images.forEach(image => {
 						/**
 						 * 1. Создаем файл (объект с атрибутами)
 						 * 2. Обращаемся к нашему this.dropzone и отображаем его использую URL
 						 */
-						let file = { name: image.name, size: image.size }; // 1. ДОБАВИЛИ
-						this.dropzone.displayExistingFile(file, image.url); // 2. ДОБАВИЛИ
+						let file = { id: image.id, name: image.name, size: image.size }; // 1. ДОБАВИЛИ id
+						this.dropzone.displayExistingFile(file, image.url);
 					});
 				});
 		},
