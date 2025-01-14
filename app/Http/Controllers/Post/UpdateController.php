@@ -17,13 +17,18 @@ class UpdateController extends Controller
 	{
 		$data = $request->validated();
 		$images = isset($data['images']) ? $data['images'] : null; // ДОБАВЛЯЕМ if
-		$imagesIdsForDelete = isset($data['images_ids_for_delete']) ? $data['images_ids_for_delete'] : null; // ДОБАВИЛИ
-		unset($data['images'], $data['images_ids_for_delete']); // ДОБАВИЛИ
+		$imagesIdsForDelete = isset($data['images_ids_for_delete']) ? $data['images_ids_for_delete'] : null;
 
-		//$post = Post::firstOrCreate($data);
+		$imagesUrlsForDelete = isset($data['images_urls_for_delete']) ? $data['images_urls_for_delete'] : null; // ДОБАВИЛИ
+
+		//dump($imagesUrlsForDelete); // все файлы остаются в массиве до перезагрузки страницы, хотя файлы уже удалены
+
+		unset($data['images'], $data['images_ids_for_delete'], $data['images_urls_for_delete']); // ДОБАВИЛИ	
+		$post->update($data); // ДОБАВИЛИ	
+
 		$currentImages = $post->images; // ДОБАВИЛИ
 		//dd($currentImages->count()); // click Update: 3
-		if ($imagesIdsForDelete) { // ДОБАВИЛИ
+		if ($imagesIdsForDelete) {
 			foreach ($currentImages as $currentImage) {
 				if (in_array($currentImage->id, $imagesIdsForDelete)) {
 					Storage::disk('public')->delete($currentImage->path); // удаляем файл из Storage
@@ -32,6 +37,18 @@ class UpdateController extends Controller
 				}
 			}
 		}
+
+		// 0 => "http://127.0.0.1:8000/storage/images/content/9cd4a38b2e32b2d0540db69a1580d092.jpg"
+		//dump($path);
+		if ($imagesUrlsForDelete) {  // ДОБАВИЛИ
+			foreach ($imagesUrlsForDelete as $imageUrlForDelete) {
+				$removeStr = $request->root() . '/storage/';
+				$path = str_replace($removeStr, '', $imageUrlForDelete);
+				//dump($path); // "images/content/b4a93108a7e55d5071a7255e81c57e3f.jpg"
+				Storage::disk('public')->delete($path); 
+			}
+		}
+
 
 		if ($images) { // ДОБАВИЛИ
 			foreach ($images as $image) {

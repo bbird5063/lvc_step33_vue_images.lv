@@ -6,9 +6,9 @@
 			Upload
 		</div>
 
-		<!--ВСТАВИЛ @image-added @change-->
+		<!--ВСТАВИЛ @image-removed -->
 		<div class="mb-3">
-			<vue-editor useCustomImageHandler @image-added="handleImageAdded" v-model="content" />
+			<vue-editor useCustomImageHandler @image-removed="handleImageRemoved" @image-added="handleImageAdded" v-model="content" />
 		</div>
 
 		<!--ИЗМЕНИЛ-->
@@ -44,7 +44,8 @@ export default {
 			title: null,
 			post: null,
 			content: null,
-			imagesIdsForDelete: [], // ДОБАВИЛИ
+			imagesIdsForDelete: [],
+			imagesUrlsForDelete: [], // ДОБАВИЛИ
 		}
 	},
 
@@ -78,8 +79,12 @@ export default {
 				this.dropzone.removeFile(file); // удаляем файлы из dropzone
 			})
 
-			this.imagesIdsForDelete.forEach(idForDelete => { // ДОБАВИЛИ
+			this.imagesIdsForDelete.forEach(idForDelete => {
 				data.append('images_ids_for_delete[]', idForDelete);
+			});
+
+			this.imagesUrlsForDelete.forEach(urlForDelete => { // ДОБАВИЛИ
+				data.append('images_urls_for_delete[]', urlForDelete);
 			});
 
 			data.append('title', this.title);
@@ -89,6 +94,14 @@ export default {
 			this.content = '';
 			axios.post(`/api/posts/${this.post.id}`, data) // ИЗМЕНИЛ, но patch(в роуте нам нужен patch) мы укажем в data.append('_method', 'PATCH')(выше), а здесь post
 				.then(res => {
+					/** 
+					 * Удаляем превьюшки, иначе они будут добавляться при каждом update()
+					 */
+					let previews = this.dropzone.previewsContainer.querySelectorAll('.dz-image-preview') // класс берем из ИР
+					previews.forEach(preview => {
+						preview.remove();
+					});
+
 					this.getPost();
 				})
 		},
@@ -127,6 +140,11 @@ export default {
 					console.log(err);
 				});
 
+		},
+
+		handleImageRemoved(url) {
+			console.log(url);
+			this.imagesUrlsForDelete.push(url);
 		},
 	},
 }
